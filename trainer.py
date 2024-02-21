@@ -60,7 +60,7 @@ class TrainerStage1:
         running_loss = 0.0
 
         for self.iteration, batch in enumerate(data_loader, self.iteration):
-            input_images, depthGT, maskGT, groundTruth = utils.unpack_batch_fixed(batch, self.cfg.device)
+            input_images, depthGT, maskGT = utils.unpack_batch_fixed(batch, self.cfg.device)
             # ------ define ground truth------
             XGT, YGT = torch.meshgrid([
                 torch.arange(self.cfg.outH), # [H,W]
@@ -73,11 +73,6 @@ class TrainerStage1:
             XYGT = XYGT.repeat([input_images.size(0), 1, 1, 1]) # [B,2V,H,W]
             XYGT = XYGT.to(self.cfg.device) # [B,2V,H,W] 
 
-
-            #TODO XYGT IS NOT ACTUALLY GROUND TRUTH
-            #TODO make a part of of the data loader that brings in the ground truth
-            XYGT = groundTruth
-
             with torch.set_grad_enabled(True):
                 optimizer.zero_grad()
 
@@ -85,16 +80,7 @@ class TrainerStage1:
                 XY = XYZ[:, :self.cfg.outViewN * 2, :, :]
                 depth = XYZ[:, self.cfg.outViewN * 2:self.cfg.outViewN * 3, :,  :]
                 mask = (maskLogit > 0).bool()
-                # ------ Compute loss ------
-                # Shape error IS here!
-                # UserWarning: Using a target size (torch.Size([1, 16, 128, 128])) that 
-                # is different to the input size (torch.Size([100, 16, 128, 128])). This will likely lead to incorrect results due to broadcasting.
-                #   return F.l1_loss(input, target, reduction=self.reduction) (from loss.py forward())
 
-
-                # TODO XYGT IS NOT ACTUALLY GROUND TRUTH
-                # print(f"XYGT: {XYGT.shape=}")
-                # print(f"XY: {XY.shape=}")
                 loss_XYZ = self.l1(XY, XYGT)
                 loss_XYZ += self.l1(depth.masked_select(mask),
                                     depthGT.masked_select(mask))
@@ -139,7 +125,7 @@ class TrainerStage1:
         running_loss = 0.0
 
         for batch in data_loader:
-            input_images, depthGT, maskGT, groundTruth = utils.unpack_batch_fixed(batch, self.cfg.device)
+            input_images, depthGT, maskGT = utils.unpack_batch_fixed(batch, self.cfg.device)
             # ------ define ground truth------
             XGT, YGT = torch.meshgrid([
                 torch.arange(self.cfg.outH), # [H,W]
@@ -149,8 +135,6 @@ class TrainerStage1:
                 XGT.repeat([self.cfg.outViewN, 1, 1]), 
                 YGT.repeat([self.cfg.outViewN, 1, 1])], dim=0) #[2V,H,W]
             XYGT = XYGT.unsqueeze(dim=0).to(self.cfg.device) # [1,2V,H,W] 
-
-            XYGT = groundTruth
 
             with torch.set_grad_enabled(False):
                 XYZ, maskLogit = model(input_images)
@@ -183,7 +167,7 @@ class TrainerStage1:
         num_imgs = 64
 
         batch = next(iter(self.data_loaders[1]))
-        input_images, depthGT, maskGT, groundTruth = utils.unpack_batch_fixed(batch, self.cfg.device)
+        input_images, depthGT, maskGT = utils.unpack_batch_fixed(batch, self.cfg.device)
 
         with torch.set_grad_enabled(False):
             XYZ, maskLogit = model(input_images)

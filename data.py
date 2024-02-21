@@ -134,18 +134,11 @@ class PointCloud2dDataset(Dataset):
         images = torch.from_numpy(images).permute((0,3,1,2))
         depthGT = torch.from_numpy(depthGT).permute((0,3,1,2))
         maskGT = torch.from_numpy(maskGT).permute((0,3,1,2))
-
-
-        groundTruth_images = batch_n["image_in"][modelIdx]
-        # print(f"groundTruth_images: {groundTruth_images.shape=}")
-
-        groundTruth_images = F.interpolate(torch.from_numpy(groundTruth_images[modelIdx, :2 * self.cfg.outViewN, :, :, 0]), scale_factor=2)
         
         return {
             "inputImage": images,
             "depthGT": depthGT,
             "maskGT": maskGT,
-            "groundTruth": groundTruth_images,
         }
 
 
