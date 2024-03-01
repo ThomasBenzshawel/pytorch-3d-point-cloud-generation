@@ -37,7 +37,7 @@ if __name__ == "__main__":
     if cfg.lrSched is not None:
         def on_after_batch(iteration):
             utils.write_on_board_lr(writer, scheduler.get_lr(), iteration)
-            scheduler.step(iteration)
+            scheduler.step()
     else: on_after_batch = None
 
     trainer = TrainerStage2(

@@ -1,8 +1,11 @@
 """Pytorch Dataset and Dataloader for 3D PCG"""
 import numpy as np
 import scipy
+# from skimage.transform import resize
 import torch
 from torch.utils.data import DataLoader, Dataset
+from torch.nn import functional as F
+
 
 
 class PointCloud2dDataset(Dataset):
@@ -86,6 +89,7 @@ class PointCloud2dDataset(Dataset):
             batch_n["depth"][modelIdxTile, sampleIdx], axis=-1)
         maskGT = np.expand_dims(
             batch_n["mask"][modelIdxTile, sampleIdx], axis=-1).astype(int)
+        
         # To tensor
         images = torch.from_numpy(images).permute((0,3,1,2))
         targetTrans = torch.from_numpy(targetTrans)
@@ -115,6 +119,11 @@ class PointCloud2dDataset(Dataset):
         # 24 is the number of rendered images for a single CAD models
         angleIdx = np.random.randint(24, size=[self.cfg.batchSize])
 
+        # print(f"modelIdx: {modelIdx=}")
+        # eval_angleIdx = np.random.randint(24, size=[self.cfg.batchSize])
+        # print("eval_angleIdx: ", eval_angleIdx)
+
+
         images = batch_n["image_in"][modelIdx, angleIdx]
         depthGT = np.transpose(batch_n["depth"][modelIdx], axes=[0, 2, 3, 1])
         maskGT = np.transpose(batch_n["mask"][modelIdx], axes=[0, 2, 3, 1])\
@@ -124,7 +133,7 @@ class PointCloud2dDataset(Dataset):
         images = torch.from_numpy(images).permute((0,3,1,2))
         depthGT = torch.from_numpy(depthGT).permute((0,3,1,2))
         maskGT = torch.from_numpy(maskGT).permute((0,3,1,2))
-
+        
         return {
             "inputImage": images,
             "depthGT": depthGT,

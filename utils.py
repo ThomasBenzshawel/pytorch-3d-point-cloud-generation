@@ -57,8 +57,9 @@ def unpack_batch_fixed(batch, device):
     input_images = batch['inputImage'].float().to(device)
     depthGT = batch['depthGT'].float().to(device)
     maskGT = batch['maskGT'].float().to(device)
+    groundTruth = batch['groundTruth'].float().to(device)
 
-    return input_images, depthGT, maskGT
+    return input_images, depthGT, maskGT, groundTruth
 
 def make_data_novel(cfg):
     ds_tr = data.PointCloud2dDataset(
