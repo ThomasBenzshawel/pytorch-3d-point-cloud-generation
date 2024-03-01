@@ -89,7 +89,7 @@ class PointCloud2dDataset(Dataset):
             batch_n["depth"][modelIdxTile, sampleIdx], axis=-1)
         maskGT = np.expand_dims(
             batch_n["mask"][modelIdxTile, sampleIdx], axis=-1).astype(int)
-        #maskGT = np.expand_dims(batch_n["mask"][modelIdxTile, sampleIdx], axis=-1).astype(np.int)
+        
         # To tensor
         images = torch.from_numpy(images).permute((0,3,1,2))
         targetTrans = torch.from_numpy(targetTrans)
@@ -128,7 +128,6 @@ class PointCloud2dDataset(Dataset):
         depthGT = np.transpose(batch_n["depth"][modelIdx], axes=[0, 2, 3, 1])
         maskGT = np.transpose(batch_n["mask"][modelIdx], axes=[0, 2, 3, 1])\
                    .astype(int)
-        #maskGT = np.transpose(batch_n["mask"][modelIdx], axes=[0, 2, 3, 1]).astype(np.int)
 
         # Convert to Tensor
         images = torch.from_numpy(images).permute((0,3,1,2))

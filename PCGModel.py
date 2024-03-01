@@ -63,8 +63,7 @@ class Encoder(nn.Module):
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
-        #x = self.fc1(x.view(-1, 4096))
-        x = self.fc1(x.reshape(-1, 4096))
+        x = self.fc1(x.contiguous().view(-1, 4096))
         x = self.fc2(x)
         x = self.fc3(x)
 
