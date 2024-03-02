@@ -16,6 +16,7 @@ if __name__ == "__main__":
     utils.make_folder(RESULTS_PATH)
 
     dataloaders = utils.make_data_fixed(cfg)
+    print(f"dataloaders: {dataloaders[1].dataset=}")
     test_dataset = dataloaders[1].dataset
 
     model = utils.build_structure_generator(cfg).to(cfg.device)
