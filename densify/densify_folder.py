@@ -25,7 +25,7 @@ if not os.path.isdir(output_path):
 for m in models:
 	timeStart = time.time()
 	
-	shape_file = "{2}/{0}/{1}/models/model_normalized.obj".format(CATEGORY,m,FOLDERPATH)
+	shape_file = "{2}{0}/{1}/models/model_normalized.obj".format(CATEGORY,m,FOLDERPATH)
 	V,E,F = util.parseObj(shape_file)
 	F = util.removeWeirdDuplicate(F)
 	Vorig,Eorig,Forig = V.copy(),E.copy(),F.copy()
