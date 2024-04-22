@@ -5,14 +5,14 @@ import os
 import numpy as np
 import pandas as pd
 import torch
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
-
 import custom_scheduler
 import data
 import torchvision
+from PCGModel_Unet import Structure_Generator_Unet
 from PCGModel import Structure_Generator
 
 
@@ -29,8 +29,8 @@ def make_logger(PATH):
     print("Create logger")
     return logger
 
-def make_summary_writer(EXPERIMENT):
-    writer = SummaryWriter(comment="_"+EXPERIMENT)
+# def make_summary_writer(EXPERIMENT):
+#     writer = SummaryWriter(comment="_"+EXPERIMENT)
 
     print("Create tensorboard logger")
     return writer
@@ -92,9 +92,15 @@ def define_losses():
     return l1_loss, bce_loss
 
 def build_structure_generator(cfg):
-    model = Structure_Generator(
-        outViewN=cfg.outViewN, outW=cfg.outW,
-        outH=cfg.outH, renderDepth=cfg.renderDepth)
+    if cfg.architecture.lower() in 'unet':
+        model = Structure_Generator_Unet(
+            outViewN=cfg.outViewN, outW=cfg.outW,
+            outH=cfg.outH, renderDepth=cfg.renderDepth)
+    else:
+        model = Structure_Generator(
+            outViewN=cfg.outViewN, outW=cfg.outW,
+            outH=cfg.outH, renderDepth=cfg.renderDepth)
+
     statement = "Build Structure Generator"
 
     if cfg.loadPath is not None:

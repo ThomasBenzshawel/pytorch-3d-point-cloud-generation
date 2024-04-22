@@ -6,7 +6,7 @@ from torch.nn import functional as F
 
 def conv2d_block(in_c, out_c):
     return nn.Sequential(
-        nn.Conv2d(in_c, out_c, 3, stride=2, padding=1),
+        nn.Conv2d(in_c, out_c, 3, stride=2, padding=1, bias=True),
         nn.BatchNorm2d(out_c),
         nn.ReLU(),
     )
@@ -21,7 +21,7 @@ def conv2d_block(in_c, out_c):
 
 def deconv2d_block(in_c, out_c):
     return nn.Sequential(
-        nn.Conv2d(in_c, out_c, 3, stride=1, padding=1),
+        nn.Conv2d(in_c, out_c, 3, stride=1, padding=1, bias=True),
         nn.BatchNorm2d(out_c),
         nn.ReLU(),
     )
@@ -48,24 +48,55 @@ def pixel_bias(outViewN, outW, outH, renderDepth):
 
 class Encoder(nn.Module):
     """Encoder of Structure Generator"""
+    # def __init__(self):
+    #     super(Encoder, self).__init__()
+    #     self.conv1 = conv2d_block(3, 96)
+    #     self.conv2 = conv2d_block(96, 128)
+    #     self.conv3 = conv2d_block(128, 192)
+    #     self.conv4 = conv2d_block(192, 256)
+    #     self.fc1 = linear_block(4096, 2048) # After flatten
+    #     self.fc2 = linear_block(2048, 1024)
+    #     self.fc3 = nn.Linear(1024, 512)
+
+
+    ## Experimenting with larger encoder
     def __init__(self):
         super(Encoder, self).__init__()
-        self.conv1 = conv2d_block(3, 96)
-        self.conv2 = conv2d_block(96, 128)
-        self.conv3 = conv2d_block(128, 192)
-        self.conv4 = conv2d_block(192, 256)
-        self.fc1 = linear_block(4096, 2048) # After flatten
-        self.fc2 = linear_block(2048, 1024)
-        self.fc3 = nn.Linear(1024, 512)
+        self.conv1 = conv2d_block(3, 64)
+        self.conv2 = conv2d_block(64, 96)
+        self.conv3 = conv2d_block(96, 128)
+        self.conv4 = conv2d_block(128, 256)
+        self.fc1 = linear_block(4096, 8192)
+        self.fc2 = linear_block(8192, 4096)
+        self.fc3 = linear_block(4096, 2048)
+        self.fc4 = linear_block(2048, 1024)
+        self.fc5 = nn.Linear(1024, 512)
 
+
+
+    # def forward(self, x):
+    #     x = self.conv1(x)
+    #     x = self.conv2(x)
+    #     x = self.conv3(x)
+    #     x = self.conv4(x)
+    #     x = self.fc1(x.contiguous().view(-1, 4096))
+    #     x = self.fc2(x)
+    #     x = self.fc3(x)
+
+    #     return x
+        
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
+        # print(x.shape)
         x = self.fc1(x.contiguous().view(-1, 4096))
+        # print(x.shape)
         x = self.fc2(x)
         x = self.fc3(x)
+        x = self.fc4(x)
+        x = self.fc5(x)
 
         return x
 
@@ -80,6 +111,11 @@ class Decoder(nn.Module):
         self.fc1 = linear_block(512, 1024)
         self.fc2 = linear_block(1024, 2048)
         self.fc3 = linear_block(2048, 4096)
+        # experiment with larger decoder
+        self.fc4 = linear_block(4096, 8192)
+        self.fc5 = linear_block(8192, 4096)        
+        # End of experiment
+
         self.deconv1 = deconv2d_block(256, 192)
         self.deconv2 = deconv2d_block(192, 128)
         self.deconv3 = deconv2d_block(128, 96)
@@ -93,7 +129,13 @@ class Decoder(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.fc3(x)
-        x = x.view([-1, 256, 4, 4])
+        # experiment with larger decoder
+        x = self.fc4(x)
+        x = self.fc5(x)
+        # end of experiment
+        # print(x.shape)
+        x = x.contiguous().view([-1, 256, 4, 4])
+        # print(x.shape)
         x = self.deconv1(F.interpolate(x, scale_factor=2))
         x = self.deconv2(F.interpolate(x, scale_factor=2))
         x = self.deconv3(F.interpolate(x, scale_factor=2))

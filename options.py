@@ -18,6 +18,9 @@ def parse_arguments():
     parser.add_argument(
         "--model", default="PCG",
         help="name for model")
+    parser.add_argument(
+    "--architecture", default="Original",
+    help="name for architecture (Unet/Original)")
 
     parser.add_argument(
         "--path", default="data",
